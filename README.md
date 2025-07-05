@@ -1,4 +1,4 @@
-#A project I did for an interview
+# A project I did for an interview
 
 It's a part of an auth-service:
 
