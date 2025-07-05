@@ -1,0 +1,139 @@
+basePath: /api
+definitions:
+  dto.ErrorResponse:
+    properties:
+      error:
+        example: error message
+        type: string
+    type: object
+  dto.TokenPair:
+    properties:
+      access_token:
+        example: jwt_access_token
+        type: string
+      refresh_token:
+        example: refresh_base64_token
+        type: string
+    type: object
+  dto.UserIdDto:
+    properties:
+      user_id:
+        example: a739620f-89de-4a12-976c-37a9661c1b91
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: A part of auth-service made for an interview
+  title: Test Go Project
+  version: "1.0"
+paths:
+  /tokens:
+    delete:
+      description: Removes the record about access/refresh token pair
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Clear tokens
+      tags:
+      - tokens
+  /tokens/{guid}:
+    get:
+      description: Generates JWT access and base64 refresh tokens for given GUID
+      parameters:
+      - description: User ID which tokens are generated for
+        in: path
+        name: guid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TokenPair'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a new token pair for given GUID
+      tags:
+      - tokens
+  /tokens/refresh/{refresh_token}:
+    get:
+      description: Updates both tokens after performing all required checks
+      parameters:
+      - description: base64 refresh token
+        in: path
+        name: refresh_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.TokenPair'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update a token pair
+      tags:
+      - tokens
+  /user:
+    get:
+      description: Returns GUID extracted from token and checks if record with such
+        GUID exists in DB
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserIdDto'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get GUID
+      tags:
+      - user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
